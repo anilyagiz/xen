@@ -100,7 +100,7 @@ endif
 ifeq ($(XEN_BUILD_PE),y)
 
 # Check if the linker produces fixups in PE by default
-efi-nr-fixups := $(shell LC_ALL=C $(OBJDUMP) -p $(efi-check).efi | grep '^[[:blank:]]*reloc[[:blank:]]*[0-9][[:blank:]].*DIR64$$' | wc -l)
+efi-nr-fixups := $(strip $(shell LC_ALL=C $(OBJDUMP) -p $(efi-check).efi | grep -E '^[[:blank:]]*reloc[[:blank:]]*[0-9][[:blank:]].*DIR64$$' | wc -l))
 
 ifeq ($(efi-nr-fixups),2)
 MKRELOC := :
@@ -123,3 +123,8 @@ endif
 
 # Set up the assembler include path properly for older toolchains.
 CFLAGS += -Wa,-I$(objtree)/include -Wa,-I$(srctree)/include
+
+# The GNU assembler will interpret '/' as a comment start marker instead of a
+# divide for some ELF targets.  Pass --divide when when available to signal '/'
+# is always used as an operator in assembly.
+$(call cc-option-add,CFLAGS,CC,-Wa$$(comma)--divide)

@@ -113,10 +113,11 @@ else
     Q := @
 endif
 
-# If the user is running make -s (silent mode), suppress echoing of
-# commands
-
-ifneq ($(findstring s,$(filter-out --%,$(MAKEFLAGS))),)
+# If the user is running make -s (silent mode), suppress echoing of commands.
+# Use MFLAGS (options only). MAKEFLAGS may include variable overrides after
+# “--” (GNU make 4.4 and newer), which can contain an “s” and falsely trigger
+# silent mode.
+ifneq ($(findstring s,$(filter-out --%,$(MFLAGS))),)
     quiet := silent_
 endif
 
@@ -412,7 +413,7 @@ ifneq ($(CONFIG_CC_IS_CLANG),y)
 CFLAGS += -Wa,--strip-local-absolute
 endif
 
-$(call cc-option-add,AFLAGS,CC,-Wa$$(comma)--noexecstack)
+$(call cc-option-add,CFLAGS,CC,-Wa$$(comma)--noexecstack)
 
 LDFLAGS-$(call ld-option,--warn-rwx-segments) += --no-warn-rwx-segments
 
